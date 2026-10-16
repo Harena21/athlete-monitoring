@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from lightgbm import LGBMClassifier, LGBMRegressor
 from scipy.stats import norm
+from sklearn import set_config
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.metrics import average_precision_score, mean_absolute_error, roc_auc_score
@@ -10,6 +11,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 SEED = 42
+set_config(transform_output="pandas")  # garde les noms de colonnes jusqu'à LightGBM
 
 # ---------------------------------------------------------------- indice de performance (0-100)
 # Blocs et sources : bien-être (Hooper 1995, McLean 2010, Saw 2016), sommeil (Fullagar 2015),
@@ -56,7 +58,8 @@ def performance_index(df, weights=WEIGHTS):
 # ---------------------------------------------------------------- cibles et variables
 FEATURES = ["steps", "trimp", "load_7d", "load_28d", "acwr", "monotony", "resting_hr", "resting_hr_delta",
             "hr_mean", "sleep_minutes", "sleep_efficiency", "sleep_score", "well_fatigue", "well_mood",
-            "well_readiness", "well_soreness", "well_stress", "n_meals", "alcohol", "age"]
+            "well_readiness", "well_soreness", "well_stress", "n_meals", "alcohol", "age",
+            "readiness_7d", "fatigue_7d", "sleep_score_7d", "steps_7d", "answered_7d"]
 PERF_FEATURES = ["perf_index", "perf_3d", "perf_7d", "readiness_7d", "fatigue_7d", "sleep_score_7d",
                  "resting_hr_delta", "acwr", "load_7d"]
 
@@ -67,7 +70,9 @@ def add_targets_and_features(df):
     roll = lambda col, w: g[col].transform(lambda s: s.astype(float).rolling(w, min_periods=1).mean())
     df["perf_3d"], df["perf_7d"] = roll("perf_index", 3), roll("perf_index", 7)
     df["readiness_7d"], df["fatigue_7d"] = roll("well_readiness", 7), roll("well_fatigue", 7)
-    df["sleep_score_7d"] = roll("sleep_score", 7)
+    df["sleep_score_7d"], df["steps_7d"] = roll("sleep_score", 7), roll("steps", 7)
+    # nombre de questionnaires remplis sur 7 jours : ne pas répondre est aussi une information
+    df["answered_7d"] = g["well_readiness"].transform(lambda s: s.notna().astype(float).rolling(7, min_periods=1).sum())
 
     # performance : moyenne de l'indice sur les 3 jours suivants (un seul jour est trop bruité)
     df["y_perf"] = g["perf_index"].transform(lambda s: s[::-1].rolling(3, min_periods=2).mean()[::-1].shift(-1))

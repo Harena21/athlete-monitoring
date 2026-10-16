@@ -114,7 +114,8 @@ def participant_daily(p):
              heart_rate(p), resting_hr(p), hr_zones(p), sleep(p), sleep_score(p), wellness(p),
              srpe(p), injury(p), reporting(p)]
     for part in parts:
-        days = days.join(part, how="left")
+        if len(part):  # p03 n'a pas de FC détaillée
+            days = days.join(part, how="left")
     return days.reset_index().assign(participant=p)
 
 

@@ -39,8 +39,8 @@ Données (notebook 1) : la charge déclarée (sRPE) n'est remplie que 31, 2 et 8
 Nettoyage (notebook 2) : les 0 du questionnaire et les valeurs impossibles deviennent des valeurs manquantes, les jours sans montre ne comptent pas comme du repos, les valeurs extrêmes sont signalées sans être supprimées. Sur cinq méthodes de remplissage testées en cachant 10 % des valeurs connues, MICE est la meilleure, c'est elle qui sert pour `test_dataset.csv`.
 
 Modèles (notebook 3) :
-- risque de blessure dans les 7 jours : LightGBM obtient une PR-AUC de 0,44 contre 0,20 pour la référence naïve. Le résultat repose surtout sur l'épisode de p05, il reste exploratoire ;
-- performance sur les 3 jours suivants : aucun modèle ne bat la simple moyenne de l'athlète. Le ressenti quotidien varie beaucoup et n'a presque pas de lien avec les mesures de la montre.
+- risque de blessure dans les 7 jours : LightGBM obtient une PR-AUC de 0,27 contre 0,16 pour la référence naïve. C'est un signal faible, qui repose surtout sur l'épisode de p05 : il reste exploratoire ;
+- performance sur les 3 jours suivants : Ridge fait à peine mieux que la simple moyenne de l'athlète (erreur de 18,3 contre 18,6 sur 100), un écart trop faible pour en tirer quelque chose. Le ressenti quotidien varie beaucoup et n'a presque pas de lien avec les mesures de la montre.
 
 Photos (notebook 4) : toutes les photos ont une date EXIF. Food-101 reconnaissait mal ces repas du quotidien, CLIP avec des classes adaptées reconnaît 21 photos de test sur 24. Les calories estimées restent bien en dessous de la dépense (photos manquantes, portions standard), ce sont des ordres de grandeur.
 
