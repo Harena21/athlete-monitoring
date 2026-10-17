@@ -94,6 +94,14 @@ Contrôles : corrélation de 0,97 avec un indice à poids égaux, et de 0,22 ave
 - Blessure : cible = au moins un rapport de blessure dans les 7 jours suivants ; les jours déjà blessés sont exclus. 25 variables : activité, charge (TRIMP, 7 j, 28 j, ACWR, monotonie), FC, sommeil, questionnaire, repas, alcool, âge, moyennes sur 7 jours de la readiness, de la fatigue, du score de sommeil et des pas, nombre de questionnaires remplis sur 7 jours. Modèles : régression logistique (L2, C = 0,1) et LightGBM peu profond (200 arbres, profondeur 3), tous deux avec des classes pondérées. Référence : prédire la fréquence des blessures vue à l'entraînement. Mesure : PR-AUC (ROC-AUC aussi affichée).
 - Performance : cible = moyenne de l'indice sur les 3 jours suivants. 9 variables : indice du jour, moyennes de l'indice sur 3 et 7 jours, readiness, fatigue et score de sommeil sur 7 jours, écart de FC de repos, ACWR, charge sur 7 jours. Modèles : Ridge (alpha = 10) et LightGBM (300 arbres, profondeur 3). Références : moyenne de l'entraînement et persistance (les 3 prochains jours = les 3 derniers). Mesure : erreur absolue moyenne sur 100.
 
+### Pourquoi ces modèles
+Avec 456 lignes et une dizaine d'épisodes de blessure, j'ai cherché à tester peu de modèles, simples et contrôlables, plutôt que d'en essayer beaucoup.
+- Régression logistique et Ridge : modèles linéaires avec une pénalité L2 qui réduit les coefficients et limite le surapprentissage quand les données sont peu nombreuses et les variables corrélées entre elles (Hoerl et Kennard 1970), ce qui est le cas des moyennes de charge sur 7 et 28 jours. Leurs coefficients se lisent directement. Ils servent de point de comparaison simple.
+- LightGBM (Ke et al. 2017) : sur des données tabulaires, les modèles à base d'arbres restent en général plus performants que les réseaux de neurones (Grinsztajn et al. 2022). Ils captent les effets non linéaires, attendus entre charge et blessure : le risque augmente surtout aux extrêmes (Gabbett 2016, Bache-Mathiesen et al. 2021). Arbres peu profonds (profondeur 3) et régularisation forte, à cause du petit nombre de lignes. Rossi et al. (2018) utilisent aussi des arbres de décision pour prévoir les blessures à partir de la charge.
+- Classes pondérées : les jours avant une blessure sont rares (environ 13 %). Sans pondération, le modèle apprendrait à toujours répondre « pas de blessure » (King et Zeng 2001).
+- Pas de réseau de neurones : trop de paramètres pour si peu de données.
+- Les réglages (profondeur, nombre d'arbres, pénalité) sont fixés à l'avance, sans recherche automatique : avec 4 plis et si peu de blessures, une recherche choisirait surtout le bruit du jeu de test.
+
 ### Photos (`src/food.py`)
 - Date : `DateTimeOriginal` de l'EXIF, avec repli sur `DateTime`, puis la date dans le nom du fichier, puis la date du fichier.
 - Reconnaissance : CLIP ViT-L/14 en zéro-shot, 20 classes décrites chacune par plusieurs phrases (la liste est dans `CLASSES`).
@@ -137,6 +145,7 @@ Contrôles : corrélation de 0,97 avec un indice à poids égaux, et de 0,22 ave
 - Charge : Foster 2001 (sRPE), Edwards 1993 (TRIMP), Gabbett 2016 et Hulin 2016 (ACWR), Impellizzeri 2020 (critique de l'ACWR), Foster 1998 (monotonie)
 - Indice : Hooper 1995, McLean 2010, Saw 2016 (questionnaires de bien-être), Fullagar 2015 (sommeil), Buchheit 2014 (FC de repos)
 - Données manquantes et valeurs extrêmes : Little et Rubin (2019), van Buuren 2011 (MICE), Iglewicz et Hoaglin 1993
+- Modèles : Hoerl et Kennard 1970 (Ridge), King et Zeng 2001 (événements rares), Ke et al. 2017 (LightGBM), Grinsztajn et al. 2022 (arbres sur données tabulaires), Bache-Mathiesen et al. 2021 (non-linéarité charge-blessure), Rossi et al. 2018 (prévision des blessures par apprentissage)
 - Évaluation : Saito et Rehmsmeier 2015 (PR-AUC sur classes rares), Bergmeir et Benítez 2012 (validation sur séries temporelles)
 - Photos : Radford 2021 (CLIP), Bossard 2014 (Food-101), USDA FoodData Central (calories)
 
