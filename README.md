@@ -36,7 +36,7 @@ La classification des photos (`python main.py --food`) demande `torch` et `trans
 
 Données (notebook 1) : la charge déclarée (sRPE) n'est remplie que 31, 2 et 8 jours selon l'athlète, donc je calcule la charge à partir des zones de fréquence cardiaque. p03 n'a pas de FC détaillée et répond presque toujours la même chose au questionnaire. Les blessures sont rares (1, 0 et 10 rapports) et celles de p05 viennent surtout d'un même épisode.
 
-Nettoyage (notebook 2) : les 0 du questionnaire et les valeurs impossibles deviennent des valeurs manquantes, les jours sans montre ne comptent pas comme du repos, les valeurs extrêmes sont signalées sans être supprimées. Sur cinq méthodes de remplissage testées en cachant 10 % des valeurs connues, MICE est la meilleure, c'est elle qui sert pour `test_dataset.csv`.
+Nettoyage (notebook 2) : les 0 du questionnaire et les valeurs impossibles deviennent des valeurs manquantes, les jours sans montre ne comptent pas comme du repos, les valeurs extrêmes sont signalées sans être supprimées. Sur cinq méthodes de remplissage testées en cachant 10 % des valeurs connues, MICE a la plus faible erreur en moyenne (de peu devant l'interpolation), c'est elle qui sert pour `test_dataset.csv`.
 
 Modèles (notebook 3) :
 - risque de blessure dans les 7 jours : LightGBM obtient une PR-AUC de 0,27 contre 0,16 pour la référence naïve. C'est un signal faible, qui repose surtout sur l'épisode de p05 : il reste exploratoire ;
