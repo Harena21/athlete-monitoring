@@ -36,7 +36,14 @@ La classification des photos (`python main.py --food`) demande `torch` et `trans
 
 Données (notebook 1) : la charge déclarée (sRPE) n'est remplie que 31, 2 et 8 jours selon l'athlète, donc je calcule la charge à partir des zones de fréquence cardiaque. p03 n'a pas de FC détaillée et répond presque toujours la même chose au questionnaire. Les blessures sont rares (1, 0 et 10 rapports) et celles de p05 viennent surtout d'un même épisode.
 
-Nettoyage (notebook 2) : les 0 du questionnaire et les valeurs impossibles deviennent des valeurs manquantes, les jours sans montre ne comptent pas comme du repos, les valeurs extrêmes sont signalées sans être supprimées. Sur cinq méthodes de remplissage testées en cachant 10 % des valeurs connues, MICE a la plus faible erreur en moyenne (de peu devant l'interpolation), c'est elle qui sert pour `test_dataset.csv`.
+Nettoyage (notebook 2) : les 0 du questionnaire et les valeurs impossibles deviennent des valeurs manquantes, les jours sans montre ne comptent pas comme du repos, les valeurs extrêmes sont signalées sans être supprimées. Pour les valeurs manquantes, j'ai comparé cinq méthodes, de la plus simple à la plus avancée :
+1. moyenne de la colonne, tous athlètes confondus ;
+2. médiane de l'athlète, qui tient compte des différences entre athlètes ;
+3. interpolation linéaire dans le temps, athlète par athlète (la valeur d'un jour est tirée des jours voisins) ;
+4. KNN (5 plus proches voisins), sur des variables standardisées pour qu'aucune ne domine la distance ;
+5. MICE (`IterativeImputer` de scikit-learn avec une forêt aléatoire) : chaque variable est prédite à partir des autres, en plusieurs passes.
+
+Le test : je cache 10 % des valeurs connues de 11 variables (pas, FC de repos, TRIMP, sommeil, questionnaire, poids), je les remplis avec chaque méthode et je mesure l'erreur (RMSE divisée par l'écart-type de la variable), sur 3 tirages. Erreur moyenne : MICE 0,90, interpolation 0,93, médiane 0,98, KNN 1,02, moyenne 1,07. MICE l'emporte de peu et l'ordre change d'un tirage à l'autre, mais c'est la méthode retenue pour `test_dataset.csv`. Je ne remplis ni les blessures, ni la sRPE, ni les calories des photos, ni l'indice, ni une variable absente plus de 80 % du temps chez un athlète (la FC de p03, par exemple).
 
 Modèles (notebook 3) :
 - risque de blessure dans les 7 jours : LightGBM obtient une PR-AUC de 0,27 contre 0,16 pour la référence naïve. C'est un signal faible, qui repose surtout sur l'épisode de p05 : il reste exploratoire ;
