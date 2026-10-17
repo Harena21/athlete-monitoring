@@ -24,7 +24,7 @@ J'ai travaillé sur Google Colab, avec les données sur Google Drive et le code 
 - les données brutes restent sur Drive et ne sont jamais versionnées : le dépôt ne contient ni les données ni leur lien ;
 - le code vit dans le dépôt GitHub, que chaque notebook clone ou met à jour au démarrage : les notebooks exécutés sur Colab utilisent donc toujours la même version de `src/`, et le projet tourne aussi en local avec `python main.py`.
 
-Sur Colab, la première cellule de chaque notebook monte Google Drive (données attendues dans `MyDrive/Colab Notebooks/athlete-data/data/raw/`), clone le dépôt et installe les dépendances. Comme le dépôt est privé, il faut un secret Colab `GITHUB_TOKEN` donnant accès à ce dépôt.
+Sur Colab, la première cellule de chaque notebook monte Google Drive (données attendues dans `MyDrive/Colab Notebooks/athlete-data/data/raw/`), clone le dépôt et installe les dépendances.
 
 La classification des photos (`python main.py --food`) demande `torch` et `transformers` et un GPU. Ses résultats sont déjà dans `data/external/`, le reste tourne sans.
 
